@@ -1364,10 +1364,12 @@ function possible_fishRoutineBegin(snapshot) {
     mouse_possible_fish.leftButton = 0;
     mouse_possible_fish._prevButtonState = [0, 0, 0];
     psychoJS.experiment.addData('possible_fish.started', globalClock.getTime());
-    // pre-set timer text to avoid 1-frame flicker on routine start
+    // pre-set text to avoid 1-frame flicker on routine start
     const _r0 = Math.max(block_time - block_clock.getTime(), 0);
     time_left.setText(String(Math.floor(_r0/60)).padStart(2,'0')+':'+String(Math.floor(_r0%60)).padStart(2,'0'), false);
     total_fish.setText((total_earnings.toString() + " lbs"), false);
+    text.setColor(new util.Color(text_color), false);
+    text.setText(("Possible fish: " + fish_price_string), false);
     possible_fishMaxDuration = null
     // keep track of which components have finished
     possible_fishComponents = [];
@@ -1679,13 +1681,18 @@ function trialRoutineBegin(snapshot) {
     const _r1 = Math.max(block_time - block_clock.getTime(), 0);
     time_left_2.setText(String(Math.floor(_r1/60)).padStart(2,'0')+':'+String(Math.floor(_r1%60)).padStart(2,'0'), false);
     total_fish_2.setText((total_earnings.toString() + " lbs"), false);
-    // for (var i=0; i < 5; i++) {
-    //     fish_x_pos[i] = ((1.8 * Math.random()) - 0.9);
-    //     fish_y_pos[i] = ((- 0.4) - (Math.random() * 0.3));
-    //     fish_x_change[i] = 0;
-    //     fish_opacity[i] = 0;
-    // }
+    text_3.setColor(new util.Color(text_color), false);
+    text_3.setText((("Casting for " + fish_value.toString()) + "lbs fish..."), false);
     // set the next fish animation parameters based on the current time in the animation cycle
+    for (var i=0; i < 5; i++) { 
+        fish_x_change[i] = (fish_dist - (fish_dist * Math.cos((((3.14 * animation_clock.getTime()) / fish_time) + ((6.28 * i) / 5)))));
+        fish_opacity[i] = (0.5 * Math.sin((((3.14 * animation_clock.getTime()) / fish_time) + ((6.28 * i) / 5))));
+        if ((fish_opacity[i] < 0)) {
+            fish_x_pos[i] = ((1.8 * Math.random()) - 0.9);
+            fish_y_pos[i] = ((- 0.4) - (Math.random() * 0.3));
+            fish_opacity[i] = 0;
+        }
+    }
     fish_animation_5.setOpacity(fish_opacity[0], false);
     fish_animation_5.setPos([(fish_x_pos[0] + fish_x_change[0]), fish_y_pos[0]], false);
     fish_animation_5.setSize([(0.4 * fish_size), (0.4 * fish_size)], false);
