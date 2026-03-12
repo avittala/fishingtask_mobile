@@ -523,6 +523,10 @@ let holding = false;
 let holdStart = null;
 let phase = 'idle'; // idle, announce, casting, result
 
+// Trial tracking
+let trials = [];
+let trialHoldStart = null;
+
 const wrapper = document.getElementById('game-wrapper');
 const lineCanvas = document.getElementById('line-canvas');
 const lctx = lineCanvas.getContext('2d');
@@ -782,6 +786,7 @@ function hideFishUnderwater() {
 // GAME LOGIC
 function startGame() {
   score = 0; timeLeft = GAME_DURATION;
+  trials = [];
   scoreDisplay.textContent = '0 lbs';
   timerDisplay.textContent = '3:00';
   timerDisplay.classList.remove('danger');
@@ -837,7 +842,7 @@ function startTrial() {
 
 function scheduleArrival() {
   // Exponential distribution: -mean * ln(U) with catch probability 
-  const delay = -MEAN_WAIT * Math.log(Math.random());
+  let delay = -MEAN_WAIT * Math.log(Math.random());
   if (Math.random() > CATCH_PROB) {
     // delay is a very large number, effectively meaning the fish won't arrive this time
     delay = 999999;
@@ -861,6 +866,7 @@ function onHoldStart(e) {
   if (phase !== 'casting' || holding) return;
   holding = true;
   holdStart = Date.now();
+  trialHoldStart = Date.now();
   holdBtn.classList.add('holding');
   holdBtn.querySelector('.icon').textContent = '🎣';
   ringCircle.style.strokeDashoffset = RING_CIRC;
@@ -910,6 +916,8 @@ holdArea.addEventListener('touchstart', () => { cancelAnimationFrame(ringAnim); 
 
 function onCatch() {
   phase = 'result';
+  const waitMs = trialHoldStart ? Date.now() - trialHoldStart : 0;
+  trials.push({ size: currentFishSize, waitSec: waitMs / 1000, caught: true });
   score += currentFishSize;
   scoreDisplay.textContent = score + ' lbs';
   holdArea.style.display = 'none';
@@ -934,6 +942,8 @@ function onCatch() {
 
 function onMiss() {
   phase = 'result';
+  const waitMs = trialHoldStart ? Date.now() - trialHoldStart : 0;
+  trials.push({ size: currentFishSize, waitSec: waitMs / 1000, caught: false });
   holdArea.style.display = 'none';
   waitIndicator.classList.add('hidden');
   removeBobber();
@@ -993,18 +1003,53 @@ function endGame() {
   phase = 'idle';
 
   panelTitle.textContent = '🌙 Fishing Over!';
-  const medal = score >= 40 ? '🏆' : score >= 20 ? '🥈' : '🐟';
-  panelSub.innerHTML = `${medal} You caught <strong>${score} pounds</strong> of fish!<br><br>${getQuip(score)}`;
+  const medal = score >= 70 ? '🏆' : score >= 60 ? '🥈' : '🐟';
+
+  // Compute stats by fish size
+  function statsForTrials(trialSet) {
+    const rows = {};
+    for (const sz of FISH_SIZES) {
+      const matching = trialSet.filter(t => t.size === sz);
+      rows[sz] = matching.length > 0
+        ? (matching.reduce((s, t) => s + t.waitSec, 0) / matching.length).toFixed(2)
+        : '—';
+    }
+    return rows;
+  }
+
+  const allStats   = statsForTrials(trials);
+  const missStats  = statsForTrials(trials.filter(t => !t.caught));
+
+  function tableRow(label, stats) {
+    return `<tr><td style="text-align:left;padding:4px 8px;color:#b8d4ea">${label}</td>${FISH_SIZES.map(sz => `<td style="padding:4px 10px;color:#f5c842">${stats[sz]}s</td>`).join('')}</tr>`;
+  }
+
+  const statsHTML = `
+    <table style="border-collapse:collapse;font-size:13px;margin-top:4px;width:100%">
+      <thead>
+        <tr>
+          <th style="padding:4px 8px;color:rgba(255,255,255,0.5);font-weight:normal;text-align:left"></th>
+          ${FISH_SIZES.map(sz => `<th style="padding:4px 10px;color:rgba(255,255,255,0.5);font-weight:normal">${sz} lb</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRow('All trials', allStats)}
+        ${tableRow('Misses only', missStats)}
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:6px">${trials.length} total trials</div>`;
+
+  panelSub.innerHTML = `${medal} You caught <strong>${score} pounds</strong> of fish!<br>${getQuip(score)}<br><br><div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px">Avg wait time by fish size</div>${statsHTML}`;
   panelBtn.textContent = 'Fish Again';
   panelBtn.onclick = () => startGame();
   panel.classList.remove('hidden');
 }
 
 function getQuip(s) {
-  if (s >= 50) return "You're a fishing legend! 🎖️";
-  if (s >= 35) return "Incredible haul! The lake is impressed.";
-  if (s >= 20) return "Not bad! The fish fear you.";
-  if (s >= 10) return "A quiet night on the water...";
+  if (s >= 75) return "You're a fishing legend! 🎖️";
+  if (s >= 70) return "Incredible haul! The lake is impressed.";
+  if (s >= 60) return "Not bad! The fish fear you.";
+  if (s >= 50) return "A quiet night on the water...";
   return "Better luck next time, angler!";
 }
 
