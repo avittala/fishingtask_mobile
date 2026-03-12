@@ -1003,7 +1003,7 @@ function endGame() {
   phase = 'idle';
 
   panelTitle.textContent = '🌙 Fishing Over!';
-  const medal = score >= 70 ? '🏆' : score >= 60 ? '🥈' : '🐟';
+  const medal = score >= 80 ? '🏆' : score >= 70 ? '🥈' : '🐟';
 
   // Compute stats by fish size
   function statsForTrials(trialSet) {
@@ -1046,7 +1046,7 @@ function endGame() {
 }
 
 function getQuip(s) {
-  if (s >= 75) return "You're a fishing legend! 🎖️";
+  if (s >= 80) return "You're a fishing legend! 🎖️";
   if (s >= 70) return "Incredible haul! The lake is impressed.";
   if (s >= 60) return "Not bad! The fish fear you.";
   if (s >= 50) return "A quiet night on the water...";
