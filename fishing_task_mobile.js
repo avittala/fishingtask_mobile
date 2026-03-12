@@ -1679,17 +1679,29 @@ function trialRoutineBegin(snapshot) {
     const _r1 = Math.max(block_time - block_clock.getTime(), 0);
     time_left_2.setText(String(Math.floor(_r1/60)).padStart(2,'0')+':'+String(Math.floor(_r1%60)).padStart(2,'0'), false);
     total_fish_2.setText((total_earnings.toString() + " lbs"), false);
-    for (var i=0; i < 5; i++) {
-        fish_x_pos[i] = ((1.8 * Math.random()) - 0.9);
-        fish_y_pos[i] = ((- 0.4) - (Math.random() * 0.3));
-        fish_x_change[i] = 0;
-        fish_opacity[i] = 0;
-    }
+    // for (var i=0; i < 5; i++) {
+    //     fish_x_pos[i] = ((1.8 * Math.random()) - 0.9);
+    //     fish_y_pos[i] = ((- 0.4) - (Math.random() * 0.3));
+    //     fish_x_change[i] = 0;
+    //     fish_opacity[i] = 0;
+    // }
+    // set the next fish animation parameters based on the current time in the animation cycle
     fish_animation_5.setOpacity(fish_opacity[0], false);
-    fish_animation_6.setOpacity(fish_opacity[0], false);
-    fish_animation_7.setOpacity(fish_opacity[0], false);
-    fish_animation_8.setOpacity(fish_opacity[0], false);
-    fish_animation_9.setOpacity(fish_opacity[0], false);
+    fish_animation_5.setPos([(fish_x_pos[0] + fish_x_change[0]), fish_y_pos[0]], false);
+    fish_animation_5.setSize([(0.4 * fish_size), (0.4 * fish_size)], false);
+    fish_animation_6.setOpacity(fish_opacity[1], false);
+    fish_animation_6.setPos([(fish_x_pos[1] + fish_x_change[1]), fish_y_pos[1]], false);
+    fish_animation_6.setSize([(0.4 * fish_size), (0.4 * fish_size)], false);
+    fish_animation_7.setOpacity(fish_opacity[2], false);
+    fish_animation_7.setPos([(fish_x_pos[2] + fish_x_change[2]), fish_y_pos[2]], false);
+    fish_animation_7.setSize([(0.4 * fish_size), (0.4 * fish_size)], false);
+    fish_animation_8.setOpacity(fish_opacity[3], false);
+    fish_animation_8.setPos([(fish_x_pos[3] + fish_x_change[3]), fish_y_pos[3]], false);
+    fish_animation_8.setSize([(0.4 * fish_size), (0.4 * fish_size)], false);
+    fish_animation_9.setOpacity(fish_opacity[4], false);
+    fish_animation_9.setPos([(fish_x_pos[4] + fish_x_change[4]), fish_y_pos[4]], false);
+    fish_animation_9.setSize([(0.4 * fish_size), (0.4 * fish_size)], false);
+    animation_clock.reset();
     trialMaxDuration = null
     // keep track of which components have finished
     trialComponents = [];
