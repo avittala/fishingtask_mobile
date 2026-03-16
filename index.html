@@ -192,7 +192,7 @@
   .splash-text {
     position: absolute;
     font-family: 'Cabin Sketch', cursive;
-    font-size: 22px;
+    font-size: 40px;
     color: var(--gold);
     text-shadow: 0 0 10px rgba(0,0,0,0.8);
     pointer-events: none;
@@ -229,7 +229,7 @@
   }
 
   .panel-sub {
-    font-size: 15px;
+    font-size: 20px;
     color: #b8d4ea;
     max-width: 280px;
     line-height: 1.5;
@@ -297,7 +297,7 @@
     justify-content: center;
     gap: 6px;
     font-family: 'Cabin Sketch', cursive;
-    font-size: 14px;
+    font-size: 24px;
     color: rgba(255,255,255,0.8);
     transition: background 0.2s, border-color 0.2s, transform 0.1s;
     box-shadow: 0 0 30px rgba(0,0,0,0.3);
@@ -337,6 +337,9 @@
   #result-overlay {
     position: absolute;
     inset: 0;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 35;
     display: flex;
     flex-direction: column;
@@ -365,7 +368,7 @@
   /* FISH SIZE INDICATOR */
   #fish-announce {
     position: absolute;
-    top: 50%;
+    top: 25%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 38;
@@ -392,7 +395,7 @@
   .announce-weight { font-family: 'Cabin Sketch', cursive; font-size: 64px; color: var(--gold); line-height: 1; }
   .announce-unit { font-size: 18px; color: #b8d4ea; margin-top: -4px; }
   .announce-img { filter: drop-shadow(0 0 14px rgba(232,168,130,0.6)); animation: fishBob 1.5s ease-in-out infinite; }
-  .announce-hint { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .announce-hint { font-size: 16px; color: rgba(255,255,255,0.5); }
 
   /* WATER SHIMMER */
   #shimmer-canvas {
@@ -429,7 +432,7 @@
   .wait-dots span:nth-child(2) { animation-delay: 0.2s; }
   .wait-dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes dotBounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
-  .wait-text { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
+  .wait-text { font-size: 18px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -499,7 +502,7 @@
   <!-- START / END PANEL -->
   <div id="panel">
     <div class="panel-title" id="panel-title">🎣 Fishing Game </div>
-    <div class="panel-sub" id="panel-sub">Catch as many pounds of fish as you can in 2 minutes.<br><br>Hold the button to cast your line and wait for the bite!</div>
+    <div class="panel-sub" id="panel-sub"> Catch as many pounds of fish as you can in 2 minutes. <br><br> Hold the button to cast your line and release when you see a bite! <br> <br> You can also release early to move to a new spot. </div>
     <button class="btn" id="panel-btn" onclick="startGame()">Start Fishing</button>
   </div>
 </div>
@@ -711,7 +714,7 @@ function spawnSplashText(x, y, text) {
   el.style.left = (x - 40) + 'px';
   el.style.top = (y - 40) + 'px';
   wrapper.appendChild(el);
-  setTimeout(() => el.remove(), 1400);
+  setTimeout(() => el.remove(), 3000);
 }
 
 // FISH DISPLAY (underwater) — 10 fish swimming left to right
@@ -963,7 +966,7 @@ function onMiss() {
 
 function showLeapingFish() {
   const waterY = getWaterY();
-  const x = wrapper.offsetWidth * 0.5;
+  const x = bobberX; // start at bobber
   const scale = Math.sqrt(currentFishSize / 9); // scale by weight (max 9)
   const fsize = Math.max(20, 100 * scale);
   fishImg.style.display = 'block';
@@ -978,13 +981,13 @@ function showLeapingFish() {
   let t = 0;
   function leap() {
     t += 0.04;
-    const vy = -waterY * 0.5 * Math.sin(t * Math.PI);
-    const vx = Math.sin(t * 2) * 10;
-    fishImg.style.top = (waterY + vy * 0.5) + 'px';
-    fishImg.style.left = (x - fsize/2 + vx) + 'px';
-    fishImg.style.transform = `rotate(${Math.sin(t*3)*20}deg)`;
-    fishImg.style.opacity = t < Math.PI ? '1' : String(Math.max(0, 1 - (t - Math.PI)));
-    if (t < Math.PI * 1.2) requestAnimationFrame(leap);
+    const dy = -wrapper.offsetHeight*0.5*t*(2-t);
+    const dx = (wrapper.offsetWidth*0.5-bobberX)*t/2; 
+    fishImg.style.top = (waterY + dy) + 'px';
+    fishImg.style.left = (x - fsize/2 + dx) + 'px';
+    fishImg.style.transform = `rotate(${t*180}deg)`;
+    fishImg.style.opacity = '1';
+    if (t < 2.0) requestAnimationFrame(leap);
     else { fishImg.style.display = 'none'; }
   }
   leap();
